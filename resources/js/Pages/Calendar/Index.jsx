@@ -3,6 +3,7 @@ import Card from '@/Components/Card';
 import StatCard from '@/Components/StatCard';
 import PageHeader from '@/Components/PageHeader';
 import PrimaryButton from '@/Components/PrimaryButton';
+import useTranslation from '@/Hooks/useTranslation';
 import { Head, Link, router } from '@inertiajs/react';
 import { ChevronRight, ChevronLeft, Plus, CalendarCheck2, ClipboardList, TrendingUp, Flame } from 'lucide-react';
 
@@ -10,6 +11,7 @@ const WEEKDAYS = ['الإثنين', 'الثلاثاء', 'الأربعاء', 'ا�
 const WEEKDAYS_SHORT = ['إث', 'ثل', 'أر', 'خم', 'جم', 'سب', 'أح'];
 
 export default function CalendarIndex({ month, monthLabel, today, startOfMonthWeekday, daysInMonth, countsByDay, prevMonth, nextMonth }) {
+    const { t } = useTranslation();
     const leadingBlanks = startOfMonthWeekday - 1;
     const cells = [];
 
@@ -36,9 +38,9 @@ export default function CalendarIndex({ month, monthLabel, today, startOfMonthWe
 
     const stats = (
         <>
-            <StatCard icon={CalendarCheck2} label="سجلات اليوم" value={todayCount} accent="brand" />
-            <StatCard icon={ClipboardList} label="إجمالي هذا الشهر" value={monthlyTotal} accent="emerald" />
-            <StatCard icon={TrendingUp} label="أيام بها سجلات" value={daysWithRecords} accent="amber" />
+            <StatCard icon={CalendarCheck2} label={t('سجلات اليوم')} value={todayCount} accent="brand" />
+            <StatCard icon={ClipboardList} label={t('إجمالي هذا الشهر')} value={monthlyTotal} accent="emerald" />
+            <StatCard icon={TrendingUp} label={t('أيام بها سجلات')} value={daysWithRecords} accent="amber" />
         </>
     );
 
@@ -46,20 +48,20 @@ export default function CalendarIndex({ month, monthLabel, today, startOfMonthWe
         <AuthenticatedLayout
             header={
                 <PageHeader
-                    title="التقويم"
-                    subtitle="نظرة شاملة على السجلات اليومية لجميع المسؤولين"
+                    title={t('التقويم')}
+                    subtitle={t('نظرة شاملة على السجلات اليومية لجميع المسؤولين')}
                     actions={
                         <Link href={route('reports.create', { date: isCurrentMonthShown ? today : `${month}-01` })}>
                             <PrimaryButton>
                                 <Plus className="h-4 w-4" />
-                                إضافة تقرير جديد
+                                {t('إضافة تقرير جديد')}
                             </PrimaryButton>
                         </Link>
                     }
                 />
             }
         >
-            <Head title="التقويم" />
+            <Head title={t('التقويم')} />
 
             <div className="space-y-6 lg:grid lg:grid-cols-3 lg:items-start lg:gap-6 lg:space-y-0">
                 {/* Stats: horizontal row on phones/tablets, folded into the side rail from lg up */}
@@ -71,7 +73,8 @@ export default function CalendarIndex({ month, monthLabel, today, startOfMonthWe
                             onClick={() => goToMonth(prevMonth)}
                             className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-600 active:scale-95"
                         >
-                            <ChevronRight className="h-4 w-4" />
+                            <ChevronRight className="h-4 w-4 rtl:block ltr:hidden" />
+                            <ChevronLeft className="h-4 w-4 ltr:block rtl:hidden" />
                         </button>
 
                         <div className="flex items-center gap-2.5">
@@ -81,7 +84,7 @@ export default function CalendarIndex({ month, monthLabel, today, startOfMonthWe
                                     onClick={() => goToMonth(today.slice(0, 7))}
                                     className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-700 transition hover:bg-brand-100"
                                 >
-                                    اليوم
+                                    {t('اليوم')}
                                 </button>
                             )}
                         </div>
@@ -90,15 +93,16 @@ export default function CalendarIndex({ month, monthLabel, today, startOfMonthWe
                             onClick={() => goToMonth(nextMonth)}
                             className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-600 active:scale-95"
                         >
-                            <ChevronLeft className="h-4 w-4" />
+                            <ChevronLeft className="h-4 w-4 rtl:block ltr:hidden" />
+                            <ChevronRight className="h-4 w-4 ltr:block rtl:hidden" />
                         </button>
                     </div>
 
                     <div className="grid grid-cols-7 gap-1 sm:gap-2 lg:gap-2.5">
                         {WEEKDAYS.map((d, idx) => (
                             <div key={d} className="py-1 text-center text-[11px] font-semibold uppercase tracking-wide text-slate-400 sm:text-xs">
-                                <span className="sm:hidden">{WEEKDAYS_SHORT[idx]}</span>
-                                <span className="hidden sm:inline">{d}</span>
+                                <span className="sm:hidden">{t(WEEKDAYS_SHORT[idx])}</span>
+                                <span className="hidden sm:inline">{t(d)}</span>
                             </div>
                         ))}
                     </div>
@@ -137,10 +141,10 @@ export default function CalendarIndex({ month, monthLabel, today, startOfMonthWe
 
                     <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-slate-100 pt-4 text-xs text-slate-500">
                         <span className="inline-flex items-center gap-1.5">
-                            <span className="inline-block h-3 w-3 shrink-0 rounded border border-brand-100 bg-brand-50" /> يحتوي على سجلات
+                            <span className="inline-block h-3 w-3 shrink-0 rounded border border-brand-100 bg-brand-50" /> {t('يحتوي على سجلات')}
                         </span>
                         <span className="inline-flex items-center gap-1.5">
-                            <span className="inline-block h-3 w-3 shrink-0 rounded border border-brand-500 ring-2 ring-brand-200" /> اليوم
+                            <span className="inline-block h-3 w-3 shrink-0 rounded border border-brand-500 ring-2 ring-brand-200" /> {t('اليوم')}
                         </span>
                     </div>
                 </Card>
@@ -152,11 +156,11 @@ export default function CalendarIndex({ month, monthLabel, today, startOfMonthWe
                     <Card padding="p-5">
                         <div className="mb-3 flex items-center gap-2">
                             <Flame className="h-4 w-4 text-slate-400" />
-                            <h3 className="text-sm font-bold text-slate-800">الأيام الأكثر نشاطًا</h3>
+                            <h3 className="text-sm font-bold text-slate-800">{t('الأيام الأكثر نشاطًا')}</h3>
                         </div>
 
                         {busiestDays.length === 0 ? (
-                            <p className="py-4 text-center text-sm text-slate-400">لا توجد سجلات هذا الشهر.</p>
+                            <p className="py-4 text-center text-sm text-slate-400">{t('لا توجد سجلات هذا الشهر.')}</p>
                         ) : (
                             <ul className="space-y-1">
                                 {busiestDays.map(({ day, count }) => (

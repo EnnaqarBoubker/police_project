@@ -2,23 +2,37 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Card from '@/Components/Card';
 import PageHeader from '@/Components/PageHeader';
 import ReportForm from './Partials/ReportForm';
+import useTranslation from '@/Hooks/useTranslation';
 import { Head } from '@inertiajs/react';
 
-export default function ReportsCreate({ centers, entities, date }) {
+export default function ReportsCreate({ entities, date }) {
+    const { t } = useTranslation();
+
     return (
         <AuthenticatedLayout
             header={
                 <PageHeader
-                    title="إضافة سجل جديد"
-                    subtitle={date ? `تاريخ التقرير: ${date}` : 'تسجيل تقرير أو مخالفة جديدة'}
-                    back={date ? { href: route('calendar.show', date), label: `العودة إلى ${date}` } : { href: route('calendar.index'), label: 'العودة إلى التقويم' }}
+                    title={t('إضافة سجل جديد')}
+                    subtitle={t('تسجيل تقرير أو مخالفة جديدة — يمكن إضافة أكثر من شخص في نفس السجل')}
+                    back={
+                        date
+                            ? { href: route('calendar.show', date), label: `${t('العودة إلى')} ${date}` }
+                            : { href: route('calendar.index'), label: t('العودة إلى التقويم') }
+                    }
                 />
             }
         >
-            <Head title="إضافة تقرير" />
+            <Head title={t('إضافة تقرير')} />
 
             <Card>
-                <ReportForm centers={centers} entities={entities} defaultDate={date} submitUrl={route('reports.store')} method="post" submitLabel="إنشاء السجل" />
+                <ReportForm
+                    entities={entities}
+                    defaultDate={date}
+                    submitUrl={route('reports.store')}
+                    method="post"
+                    submitLabel="حفظ السجل"
+                    allowMultiplePeople
+                />
             </Card>
         </AuthenticatedLayout>
     );

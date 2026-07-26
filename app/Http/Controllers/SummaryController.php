@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Center;
+use App\Models\Entity;
 use App\Services\ReportSummaryService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
@@ -17,7 +17,7 @@ class SummaryController extends Controller
 
     /**
      * Daily & monthly summary, aggregated over the entire shared dataset,
-     * optionally filtered by center or violation type.
+     * optionally filtered by entity or violation type.
      */
     public function index(Request $request): Response
     {
@@ -29,16 +29,21 @@ class SummaryController extends Controller
             ? CarbonImmutable::createFromFormat('Y-m-d', $request->string('month').'-01')
             : CarbonImmutable::today()->startOfMonth();
 
-        $filters = $request->only(['center_id', 'violation_type']);
+        $filters = $request->only(['entity_id', 'violation_type']);
 
         return Inertia::render('Summary/Index', [
             'date' => $date->toDateString(),
             'month' => $month->format('Y-m'),
             'dailyCount' => $this->summaries->dailyCount($date, $filters),
             'monthlyTotal' => $this->summaries->monthlyTotal($month, $filters),
-            'byCenter' => $this->summaries->monthlyByCenter($month, $filters),
+            'byEntity' => $this->summaries->monthlyByEntity($month, $filters),
             'byViolationType' => $this->summaries->monthlyByViolationType($month, $filters),
-            'centers' => Center::orderBy('name')->get(['id', 'name']),
+            'entities' => Entity::query()
+                ->topLevel()
+                ->active()
+                ->with(['children' => fn ($q) => $q->active()->orderBy('name')])
+                ->orderBy('name')
+                ->get(['id', 'name', 'parent_id', 'status']),
             'filters' => $filters,
         ]);
     }

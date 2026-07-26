@@ -8,6 +8,7 @@ import SelectInput from '@/Components/SelectInput';
 import PrimaryButton from '@/Components/PrimaryButton';
 import SecondaryButton from '@/Components/SecondaryButton';
 import EntityCard from './EntityCard';
+import useTranslation from '@/Hooks/useTranslation';
 import { useForm, router } from '@inertiajs/react';
 import { Plus, Landmark } from 'lucide-react';
 
@@ -16,6 +17,7 @@ import { Plus, Landmark } from 'lucide-react';
  * the top-level entities page and a single entity's branches page.
  */
 export default function EntityPanel({ entities, parentId = null, getHref, getMeta, emptyTitle, emptyDescription, deleteWarning }) {
+    const { t } = useTranslation();
     const [modalOpen, setModalOpen] = useState(false);
     const [editingEntity, setEditingEntity] = useState(null);
 
@@ -71,7 +73,7 @@ export default function EntityPanel({ entities, parentId = null, getHref, getMet
                     <span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-500 text-white">
                         <Plus className="h-4 w-4" />
                     </span>
-                    اضف جهة جديدة
+                    {t('اضف جهة جديدة')}
                 </button>
             </div>
 
@@ -94,10 +96,10 @@ export default function EntityPanel({ entities, parentId = null, getHref, getMet
 
             <Modal show={modalOpen} onClose={close} maxWidth="md">
                 <form onSubmit={submit} className="p-6">
-                    <h2 className="text-lg font-bold text-slate-900">{editingEntity ? 'تعديل الجهة' : 'إضافة جهة جديدة'}</h2>
+                    <h2 className="text-lg font-bold text-slate-900">{editingEntity ? t('تعديل الجهة') : t('إضافة جهة جديدة')}</h2>
 
                     <div className="mt-5">
-                        <InputLabel htmlFor="name" value="اسم الجهة" required />
+                        <InputLabel htmlFor="name" value={t('اسم الجهة')} required />
                         <TextInput
                             id="name"
                             className="mt-1 block w-full"
@@ -110,20 +112,20 @@ export default function EntityPanel({ entities, parentId = null, getHref, getMet
                     </div>
 
                     <div className="mt-5">
-                        <InputLabel htmlFor="status" value="الحالة" required />
+                        <InputLabel htmlFor="status" value={t('الحالة')} required />
                         <SelectInput id="status" className="mt-1" value={data.status} onChange={(e) => setData('status', e.target.value)}>
-                            <option value="active">نشطة</option>
-                            <option value="inactive">غير نشطة</option>
+                            <option value="active">{t('نشطة')}</option>
+                            <option value="inactive">{t('غير نشطة')}</option>
                         </SelectInput>
                         <InputError message={errors.status} />
                     </div>
 
                     <div className="mt-8 flex justify-end gap-3">
                         <SecondaryButton type="button" onClick={close}>
-                            إلغاء
+                            {t('إلغاء')}
                         </SecondaryButton>
                         <PrimaryButton type="submit" disabled={processing}>
-                            {editingEntity ? 'حفظ التعديلات' : 'إضافة الجهة'}
+                            {editingEntity ? t('حفظ التعديلات') : t('إضافة الجهة')}
                         </PrimaryButton>
                     </div>
                 </form>

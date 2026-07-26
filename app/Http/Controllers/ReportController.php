@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Exports\ReportsExport;
 use App\Http\Requests\StoreReportRequest;
 use App\Http\Requests\UpdateReportRequest;
-use App\Models\Center;
 use App\Models\Entity;
 use App\Models\Report;
 use Illuminate\Http\RedirectResponse;
@@ -28,7 +27,7 @@ class ReportController extends Controller
      */
     public function index(Request $request): Response
     {
-        $filters = $request->only(['search', 'date', 'center_id', 'entity_id', 'gender', 'marital_status', 'violation_type']);
+        $filters = $request->only(['search', 'date', 'entity_id', 'gender', 'nationality', 'marital_status', 'violation_type']);
 
         $reports = Report::query()
             ->with(['center', 'entity.parent', 'creator'])
@@ -40,7 +39,6 @@ class ReportController extends Controller
 
         return Inertia::render('Reports/Index', [
             'reports' => $reports,
-            'centers' => Center::orderBy('name')->get(['id', 'name']),
             'entities' => $this->entityTree(),
             'filters' => $filters,
         ]);
@@ -54,7 +52,7 @@ class ReportController extends Controller
     {
         $this->authorize('viewAny', Report::class);
 
-        $filters = $request->only(['search', 'date', 'center_id', 'entity_id', 'gender', 'marital_status', 'violation_type']);
+        $filters = $request->only(['search', 'date', 'entity_id', 'gender', 'nationality', 'marital_status', 'violation_type']);
 
         return Excel::download(new ReportsExport($filters), 'reports-'.now()->format('Y-m-d-His').'.xlsx');
     }
@@ -62,29 +60,32 @@ class ReportController extends Controller
     public function create(Request $request): Response
     {
         return Inertia::render('Reports/Create', [
-            'centers' => Center::orderBy('name')->get(['id', 'name']),
             'entities' => $this->entityTree(),
             'date' => $request->query('date'),
         ]);
     }
 
+    /**
+     * Creates one report per person in the batch, all sharing the same
+     * date/violation type/entity — the whole group is saved in a single
+     * transaction rather than one request per person.
+     */
     public function store(StoreReportRequest $request): RedirectResponse
     {
-        $report = DB::transaction(function () use ($request) {
-            $report = Report::create([
-                ...$request->safe()->except('entities'),
-                'created_by' => $request->user()->id,
-            ]);
+        $shared = $request->safe()->only(['report_date', 'report_time', 'violation_type', 'entity_id', 'notes']);
+        $people = $request->safe()->input('people', []);
 
-            foreach ($request->safe()->input('entities', []) as $entity) {
-                $report->entities()->create($entity);
-            }
+        $reports = DB::transaction(fn () => collect($people)->map(fn (array $person) => Report::create([
+            ...$shared,
+            ...$person,
+            'created_by' => $request->user()->id,
+        ])));
 
-            return $report;
-        });
+        $status = $reports->count() > 1
+            ? __('تمت إضافة :count سجلات.', ['count' => $reports->count()])
+            : __('تمت إضافة السجل.');
 
-        return redirect()->route('calendar.show', $report->report_date->toDateString())
-            ->with('status', 'Report added.');
+        return redirect()->route('calendar.show', $shared['report_date'])->with('status', $status);
     }
 
     public function show(Report $report): Response
@@ -97,24 +98,16 @@ class ReportController extends Controller
     public function edit(Report $report): Response
     {
         return Inertia::render('Reports/Edit', [
-            'report' => $report->load('entities'),
-            'centers' => Center::orderBy('name')->get(['id', 'name']),
+            'report' => $report,
             'entities' => $this->entityTree($report),
         ]);
     }
 
     public function update(UpdateReportRequest $request, Report $report): RedirectResponse
     {
-        DB::transaction(function () use ($request, $report) {
-            $report->update($request->safe()->except('entities'));
+        $report->update($request->validated());
 
-            $report->entities()->delete();
-            foreach ($request->safe()->input('entities', []) as $entity) {
-                $report->entities()->create($entity);
-            }
-        });
-
-        return redirect()->route('reports.show', $report)->with('status', 'Report updated.');
+        return redirect()->route('reports.show', $report)->with('status', __('تم تحديث السجل.'));
     }
 
     public function destroy(Report $report): RedirectResponse
@@ -122,7 +115,7 @@ class ReportController extends Controller
         $date = $report->report_date->toDateString();
         $report->delete();
 
-        return redirect()->route('calendar.show', $date)->with('status', 'Report deleted.');
+        return redirect()->route('calendar.show', $date)->with('status', __('تم حذف السجل.'));
     }
 
     /**

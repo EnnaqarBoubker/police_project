@@ -60,7 +60,7 @@ class Entity extends Model
     }
 
     /**
-     * Display label including parent, e.g. "POLICE — بي نصار", used
+     * Display label including parent, e.g. "Sûreté Régionale de Nador — بي نصار", used
      * anywhere a report's entity is shown (list/show/export).
      */
     public function displayName(): string

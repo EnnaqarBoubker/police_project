@@ -1,28 +1,31 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
 import EntityPanel from './Partials/EntityPanel';
+import useTranslation from '@/Hooks/useTranslation';
 import { Head } from '@inertiajs/react';
 
 export default function EntitiesShow({ parent, entities }) {
+    const { t } = useTranslation();
+
     return (
         <AuthenticatedLayout
             header={
                 <PageHeader
-                    title={`فروع ${parent.name}`}
-                    subtitle="الجهات الفرعية التابعة لهذه الجهة"
-                    back={{ href: route('entities.index'), label: 'العودة إلى الجهات' }}
+                    title={`${t('فروع')} ${parent.name}`}
+                    subtitle={t('الاجهزة والجهات الفرعية التابعة لهذه الجهة')}
+                    back={{ href: route('entities.index'), label: t('العودة إلى الاجهزة والجهات') }}
                 />
             }
         >
-            <Head title={`فروع ${parent.name}`} />
+            <Head title={`${t('فروع')} ${parent.name}`} />
 
             <EntityPanel
                 entities={entities}
                 parentId={parent.id}
-                getMeta={(entity) => `${entity.reports_count} سجل`}
-                emptyTitle="لا توجد فروع بعد"
-                emptyDescription={`أضف أول فرع تابع لـ ${parent.name}.`}
-                deleteWarning={(entity) => `هل تريد حذف الفرع "${entity.name}"؟ ستبقى السجلات المرتبطة به دون حذف.`}
+                getMeta={(entity) => t(':n سجل', { n: entity.reports_count })}
+                emptyTitle={t('لا توجد فروع بعد')}
+                emptyDescription={t('أضف أول فرع تابع لـ :name.', { name: parent.name })}
+                deleteWarning={(entity) => t('هل تريد حذف الفرع ":name"؟ ستبقى السجلات المرتبطة به دون حذف.', { name: entity.name })}
             />
         </AuthenticatedLayout>
     );

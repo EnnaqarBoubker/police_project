@@ -1,31 +1,37 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PageHeader from '@/Components/PageHeader';
 import EntityPanel from './Partials/EntityPanel';
+import useTranslation from '@/Hooks/useTranslation';
 import { Head } from '@inertiajs/react';
 
 export default function EntitiesIndex({ entities }) {
+    const { t } = useTranslation();
+
     return (
         <AuthenticatedLayout
             header={
                 <PageHeader
-                    title="الجهات"
-                    subtitle="الجهات الرئيسية التي يمكن ربطها بالسجلات — افتح جهة لإدارة فروعها"
+                    title={t('الاجهزة والجهات')}
+                    subtitle={t('الاجهزة والجهات الرئيسية التي يمكن ربطها بالسجلات — افتح جهة لإدارة فروعها')}
                 />
             }
         >
-            <Head title="الجهات" />
+            <Head title={t('الاجهزة والجهات')} />
 
             <EntityPanel
                 entities={entities}
                 parentId={null}
                 getHref={(entity) => route('entities.show', entity.id)}
-                getMeta={(entity) => (entity.children_count > 0 ? `${entity.children_count} فروع` : `${entity.reports_count} سجل`)}
-                emptyTitle="لا توجد جهات بعد"
-                emptyDescription="أضف أول جهة لتظهر في نموذج إضافة السجل."
+                getMeta={(entity) => (entity.children_count > 0 ? t(':n فروع', { n: entity.children_count }) : t(':n سجل', { n: entity.reports_count }))}
+                emptyTitle={t('لا توجد جهات بعد')}
+                emptyDescription={t('أضف أول جهة لتظهر في نموذج إضافة السجل.')}
                 deleteWarning={(entity) =>
                     entity.children_count > 0
-                        ? `هل تريد حذف الجهة "${entity.name}"؟ سيتم حذف كل فروعها (${entity.children_count}) أيضًا، وستبقى السجلات المرتبطة بها بدون جهة.`
-                        : `هل تريد حذف الجهة "${entity.name}"؟ ستبقى السجلات المرتبطة بها دون حذف.`
+                        ? t('هل تريد حذف الجهة ":name"؟ سيتم حذف كل فروعها (:count) أيضًا، وستبقى السجلات المرتبطة بها بدون جهة.', {
+                              name: entity.name,
+                              count: entity.children_count,
+                          })
+                        : t('هل تريد حذف الجهة ":name"؟ ستبقى السجلات المرتبطة بها دون حذف.', { name: entity.name })
                 }
             />
         </AuthenticatedLayout>

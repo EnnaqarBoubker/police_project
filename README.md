@@ -1,4 +1,4 @@
-# POLICE System
+# Sûreté Régionale de Nador System
 
 Security reports & violations management system. Built with Laravel, Inertia.js, React, and Tailwind CSS, per `cahier.md`.
 

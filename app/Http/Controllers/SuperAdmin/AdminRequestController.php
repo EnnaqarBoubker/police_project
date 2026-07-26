@@ -31,7 +31,7 @@ class AdminRequestController extends Controller
 
         $user->update(['status' => 'approved']);
 
-        return back()->with('status', "{$user->name} has been approved.");
+        return back()->with('status', __('تمت الموافقة على :name.', ['name' => $user->name]));
     }
 
     public function reject(User $user): RedirectResponse
@@ -40,6 +40,6 @@ class AdminRequestController extends Controller
 
         $user->update(['status' => 'rejected']);
 
-        return back()->with('status', "{$user->name} has been rejected.");
+        return back()->with('status', __('تم رفض :name.', ['name' => $user->name]));
     }
 }

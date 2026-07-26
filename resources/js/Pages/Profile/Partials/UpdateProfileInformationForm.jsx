@@ -2,10 +2,12 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
+import useTranslation from '@/Hooks/useTranslation';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { Transition } from '@headlessui/react';
 
 export default function UpdateProfileInformation({ mustVerifyEmail, status, className = '' }) {
+    const { t } = useTranslation();
     const user = usePage().props.auth.user;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
@@ -22,13 +24,13 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-bold text-slate-900">المعلومات الشخصية</h2>
-                <p className="mt-1 text-sm text-slate-500">حدّث اسمك وبريدك الإلكتروني.</p>
+                <h2 className="text-lg font-bold text-slate-900">{t('المعلومات الشخصية')}</h2>
+                <p className="mt-1 text-sm text-slate-500">{t('حدّث اسمك وبريدك الإلكتروني.')}</p>
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-5">
                 <div>
-                    <InputLabel htmlFor="name" value="الاسم" />
+                    <InputLabel htmlFor="name" value={t('الاسم')} />
 
                     <TextInput
                         id="name"
@@ -40,11 +42,11 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
                         autoComplete="name"
                     />
 
-                    <InputError message={errors.name} />
+                    <InputError message={errors.name && t(errors.name)} />
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="email" value="البريد الإلكتروني" />
+                    <InputLabel htmlFor="email" value={t('البريد الإلكتروني')} />
 
                     <TextInput
                         id="email"
@@ -56,33 +58,33 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
                         autoComplete="username"
                     />
 
-                    <InputError message={errors.email} />
+                    <InputError message={errors.email && t(errors.email)} />
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (
                     <div>
                         <p className="text-sm text-slate-700">
-                            بريدك الإلكتروني غير مؤكّد.
+                            {t('بريدك الإلكتروني غير مؤكّد.')}
                             <Link
                                 href={route('verification.send')}
                                 method="post"
                                 as="button"
                                 className="ms-1 font-semibold text-brand-600 hover:text-brand-700"
                             >
-                                انقر هنا لإعادة إرسال رابط التأكيد.
+                                {t('انقر هنا لإعادة إرسال رابط التأكيد.')}
                             </Link>
                         </p>
 
                         {status === 'verification-link-sent' && (
                             <div className="mt-2 text-sm font-medium text-emerald-600">
-                                تم إرسال رابط تأكيد جديد إلى بريدك الإلكتروني.
+                                {t('تم إرسال رابط تأكيد جديد إلى بريدك الإلكتروني.')}
                             </div>
                         )}
                     </div>
                 )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>حفظ</PrimaryButton>
+                    <PrimaryButton disabled={processing}>{t('حفظ')}</PrimaryButton>
 
                     <Transition
                         show={recentlySuccessful}
@@ -91,7 +93,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-slate-500">تم الحفظ.</p>
+                        <p className="text-sm text-slate-500">{t('تم الحفظ.')}</p>
                     </Transition>
                 </div>
             </form>

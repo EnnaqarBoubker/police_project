@@ -27,14 +27,14 @@ class DatabaseSeeder extends Seeder
         $centers = collect(['Bouqana 1', 'Bouqana 2', 'Zone 1', 'Zone 2'])
             ->map(fn (string $name) => Center::create(['name' => $name]));
 
-        // Default entities/parties (POLICE, Police, FA, ...) available to all admins.
-        $topLevelEntities = collect(['POLICE', 'Police', 'FA'])
+        // Default entities/parties (Sûreté Régionale de Nador, Police, FA, ...) available to all admins.
+        $topLevelEntities = collect(['Sûreté Régionale de Nador', 'Police', 'FA'])
             ->mapWithKeys(fn (string $name) => [$name => Entity::firstOrCreate(['name' => $name, 'parent_id' => null], ['status' => 'active'])]);
 
-        // Sample branches under POLICE.
+        // Sample branches under Sûreté Régionale de Nador.
         collect(['بي نصار', 'ازغنغان', 'الناظور سنتر', 'بوعرور', 'خاص بالنزارق'])
             ->each(fn (string $name) => Entity::firstOrCreate(
-                ['name' => $name, 'parent_id' => $topLevelEntities['POLICE']->id],
+                ['name' => $name, 'parent_id' => $topLevelEntities['Sûreté Régionale de Nador']->id],
                 ['status' => 'active']
             ));
 

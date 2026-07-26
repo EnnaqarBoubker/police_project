@@ -3,6 +3,8 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import Toast from '@/Components/Toast';
+import LanguageSwitcher from '@/Components/LanguageSwitcher';
+import useTranslation from '@/Hooks/useTranslation';
 import { Link, usePage } from '@inertiajs/react';
 import { Dialog, Transition } from '@headlessui/react';
 import {
@@ -22,7 +24,7 @@ import {
 
 const adminLinks = [
     { name: 'التقويم', route: 'calendar.index', active: 'calendar.*', icon: CalendarDays },
-    { name: 'الجهات', route: 'entities.index', active: 'entities.*', icon: Landmark },
+    { name: 'الاجهزة والجهات', route: 'entities.index', active: 'entities.*', icon: Landmark },
     { name: 'السجلات', route: 'reports.index', active: 'reports.*', icon: ClipboardList },
     { name: 'الملخصات', route: 'summary.index', active: 'summary.*', icon: BarChart3 },
 ];
@@ -42,21 +44,21 @@ function initials(name = '') {
         .toUpperCase();
 }
 
-function SidebarContent({ links, isSuperAdmin }) {
+function SidebarContent({ links, isSuperAdmin, t }) {
     return (
         <>
             <Link href={route('home')} className="flex items-center gap-3 px-2 py-1">
                 <ApplicationLogo className="h-10 w-10 shrink-0 text-brand-400" />
                 <div>
-                    <p className="text-base font-extrabold tracking-wide text-white">POLICE</p>
-                    <p className="text-[11px] font-medium text-slate-400">إدارة التقارير الأمنية</p>
+                    <p className="text-base font-extrabold tracking-wide text-white">Sûreté Régionale de Nador</p>
+                    <p className="text-[11px] font-medium text-slate-400">{t('إدارة التقارير الأمنية')}</p>
                 </div>
             </Link>
 
             <div className="mt-8 flex items-center gap-2 px-2">
                 <ShieldCheck className="h-3.5 w-3.5 text-slate-500" />
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                    {isSuperAdmin ? 'مساحة المشرف العام' : 'مساحة العمل'}
+                    {isSuperAdmin ? t('مساحة المشرف العام') : t('مساحة العمل')}
                 </p>
             </div>
 
@@ -68,7 +70,7 @@ function SidebarContent({ links, isSuperAdmin }) {
                         active={route().current(link.active)}
                         icon={link.icon}
                     >
-                        {link.name}
+                        {t(link.name)}
                     </NavLink>
                 ))}
             </nav>
@@ -79,6 +81,7 @@ function SidebarContent({ links, isSuperAdmin }) {
 export default function Authenticated({ header, children }) {
     const { auth } = usePage().props;
     const flash = usePage().props.flash;
+    const { t } = useTranslation();
     const user = auth.user;
     const isSuperAdmin = user.role === 'superadmin';
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -91,11 +94,14 @@ export default function Authenticated({ header, children }) {
 
             {/* Desktop sidebar */}
             <aside className="fixed inset-y-0 start-0 z-30 hidden w-72 flex-col bg-gradient-to-b from-slate-950 to-brand-950 px-4 py-6 lg:flex">
-                <SidebarContent links={links} isSuperAdmin={isSuperAdmin} />
+                <SidebarContent links={links} isSuperAdmin={isSuperAdmin} t={t} />
 
-                <div className="mt-auto rounded-xl bg-white/5 p-3">
-                    <p className="text-xs font-medium text-slate-400">متصل باسم</p>
-                    <p className="mt-0.5 truncate text-sm font-semibold text-white">{user.name}</p>
+                <div className="mt-auto space-y-3">
+                    <LanguageSwitcher variant="dark" />
+                    <div className="rounded-xl bg-white/5 p-3">
+                        <p className="text-xs font-medium text-slate-400">{t('متصل باسم')}</p>
+                        <p className="mt-0.5 truncate text-sm font-semibold text-white">{user.name}</p>
+                    </div>
                 </div>
             </aside>
 
@@ -132,7 +138,7 @@ export default function Authenticated({ header, children }) {
                             </button>
 
                             <div className="mt-8">
-                                <SidebarContent links={links} isSuperAdmin={isSuperAdmin} />
+                                <SidebarContent links={links} isSuperAdmin={isSuperAdmin} t={t} />
                             </div>
                         </Dialog.Panel>
                     </Transition.Child>
@@ -141,7 +147,7 @@ export default function Authenticated({ header, children }) {
 
             {/* Main column */}
             <div className="flex min-h-screen flex-col lg:ps-72">
-                <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-slate-200 bg-white/80 px-4 backdrop-blur sm:px-6 lg:px-8">
+                <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-slate-200 bg-white/80 px-4 backdrop-blur sm:px-6 lg:px-8">
                     <button
                         onClick={() => setMobileOpen(true)}
                         className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 lg:hidden"
@@ -150,6 +156,10 @@ export default function Authenticated({ header, children }) {
                     </button>
 
                     <div className="flex-1" />
+
+                    <div className="lg:hidden">
+                        <LanguageSwitcher variant="light" />
+                    </div>
 
                     <Dropdown>
                         <Dropdown.Trigger>
@@ -163,7 +173,7 @@ export default function Authenticated({ header, children }) {
                                 <span className="hidden text-start sm:block">
                                     <span className="block text-sm font-semibold text-slate-800">{user.name}</span>
                                     <span className="block text-xs text-slate-400">
-                                        {isSuperAdmin ? 'المشرف العام' : 'مسؤول'}
+                                        {isSuperAdmin ? t('المشرف العام') : t('مسؤول')}
                                     </span>
                                 </span>
                                 <ChevronDown className="hidden h-4 w-4 text-slate-400 sm:block" />
@@ -173,11 +183,11 @@ export default function Authenticated({ header, children }) {
                         <Dropdown.Content>
                             <Dropdown.Link href={route('profile.edit')}>
                                 <Settings className="h-4 w-4 text-slate-400" />
-                                الملف الشخصي
+                                {t('الملف الشخصي')}
                             </Dropdown.Link>
                             <Dropdown.Link href={route('logout')} method="post" as="button">
                                 <LogOut className="h-4 w-4 text-slate-400" />
-                                تسجيل الخروج
+                                {t('تسجيل الخروج')}
                             </Dropdown.Link>
                         </Dropdown.Content>
                     </Dropdown>

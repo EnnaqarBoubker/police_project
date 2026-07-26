@@ -5,9 +5,11 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import Alert from '@/Components/Alert';
+import useTranslation from '@/Hooks/useTranslation';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Register() {
+    const { t } = useTranslation();
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         username: '',
@@ -30,20 +32,20 @@ export default function Register() {
 
     return (
         <GuestLayout>
-            <Head title="إنشاء حساب" />
+            <Head title={t('إنشاء حساب')} />
 
             <div className="mb-6">
-                <h1 className="text-2xl font-bold text-slate-900">إنشاء حساب مسؤول</h1>
-                <p className="mt-1 text-sm text-slate-500">سيتم إنشاء حسابك وتحتاج إلى موافقة المشرف العام قبل تسجيل الدخول.</p>
+                <h1 className="text-2xl font-bold text-slate-900">{t('إنشاء حساب مسؤول')}</h1>
+                <p className="mt-1 text-sm text-slate-500">{t('سيتم إنشاء حسابك وتحتاج إلى موافقة المشرف العام قبل تسجيل الدخول.')}</p>
             </div>
 
             <Alert variant="info" className="mb-6">
-                لن تتمكن من تسجيل الدخول إلا بعد مراجعة طلبك والموافقة عليه من طرف المشرف العام.
+                {t('لن تتمكن من تسجيل الدخول إلا بعد مراجعة طلبك والموافقة عليه من طرف المشرف العام.')}
             </Alert>
 
             <form onSubmit={submit} className="space-y-5">
                 <div>
-                    <InputLabel htmlFor="name" value="الاسم الكامل" required />
+                    <InputLabel htmlFor="name" value={t('الاسم الكامل')} required />
 
                     <TextInput
                         id="name"
@@ -56,11 +58,11 @@ export default function Register() {
                         required
                     />
 
-                    <InputError message={errors.name} />
+                    <InputError message={errors.name && t(errors.name)} />
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="username" value="اسم المستخدم" required />
+                    <InputLabel htmlFor="username" value={t('اسم المستخدم')} required />
 
                     <TextInput
                         id="username"
@@ -72,11 +74,11 @@ export default function Register() {
                         required
                     />
 
-                    <InputError message={errors.username} />
+                    <InputError message={errors.username && t(errors.username)} />
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="email" value="البريد الإلكتروني" required />
+                    <InputLabel htmlFor="email" value={t('البريد الإلكتروني')} required />
 
                     <TextInput
                         id="email"
@@ -89,12 +91,12 @@ export default function Register() {
                         required
                     />
 
-                    <InputError message={errors.email} />
+                    <InputError message={errors.email && t(errors.email)} />
                 </div>
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
-                        <InputLabel htmlFor="password" value="كلمة المرور" required />
+                        <InputLabel htmlFor="password" value={t('كلمة المرور')} required />
 
                         <TextInput
                             id="password"
@@ -107,11 +109,11 @@ export default function Register() {
                             required
                         />
 
-                        <InputError message={errors.password} />
+                        <InputError message={errors.password && t(errors.password)} />
                     </div>
 
                     <div>
-                        <InputLabel htmlFor="password_confirmation" value="تأكيد كلمة المرور" required />
+                        <InputLabel htmlFor="password_confirmation" value={t('تأكيد كلمة المرور')} required />
 
                         <TextInput
                             id="password_confirmation"
@@ -124,18 +126,18 @@ export default function Register() {
                             required
                         />
 
-                        <InputError message={errors.password_confirmation} />
+                        <InputError message={errors.password_confirmation && t(errors.password_confirmation)} />
                     </div>
                 </div>
 
                 <PrimaryButton className="w-full" size="lg" disabled={processing}>
-                    إرسال طلب التسجيل
+                    {t('إرسال طلب التسجيل')}
                 </PrimaryButton>
 
                 <p className="text-center text-sm text-slate-500">
-                    لديك حساب بالفعل؟{' '}
+                    {t('لديك حساب بالفعل؟')}{' '}
                     <Link href={route('login')} className="font-semibold text-brand-600 hover:text-brand-700">
-                        تسجيل الدخول
+                        {t('تسجيل الدخول')}
                     </Link>
                 </p>
             </form>

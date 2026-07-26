@@ -20,6 +20,6 @@ class CenterController extends Controller
 
         Center::create($data);
 
-        return back()->with('status', 'Center added.');
+        return back()->with('status', __('تمت إضافة المركز بنجاح.'));
     }
 }

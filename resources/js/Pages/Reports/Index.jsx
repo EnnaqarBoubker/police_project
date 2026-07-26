@@ -9,19 +9,22 @@ import Card from '@/Components/Card';
 import PageHeader from '@/Components/PageHeader';
 import EmptyState from '@/Components/EmptyState';
 import MobileRecordCard from '@/Components/MobileRecordCard';
-import { GENDER_OPTIONS, MARITAL_STATUS_OPTIONS, optionLabel, entityLabel } from '@/Constants/reportOptions';
+import CountrySelect from '@/Components/CountrySelect';
+import useTranslation from '@/Hooks/useTranslation';
+import { GENDER_OPTIONS, MARITAL_STATUS_OPTIONS, optionLabel, entityLabel, countryLabel } from '@/Constants/reportOptions';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { Search, SlidersHorizontal, FileSearch, FileDown, User2, ChevronDown } from 'lucide-react';
+import { Search, SlidersHorizontal, FileSearch, FileDown, User2, ChevronDown, X } from 'lucide-react';
 
-export default function ReportsIndex({ reports, centers, entities, filters }) {
+export default function ReportsIndex({ reports, entities, filters }) {
+    const { t } = useTranslation();
     const [filtersOpen, setFiltersOpen] = useState(false);
 
     const { data, setData, get } = useForm({
         search: filters.search ?? '',
         date: filters.date ?? '',
-        center_id: filters.center_id ?? '',
         entity_id: filters.entity_id ?? '',
         gender: filters.gender ?? '',
+        nationality: filters.nationality ?? '',
         marital_status: filters.marital_status ?? '',
         violation_type: filters.violation_type ?? '',
     });
@@ -40,43 +43,68 @@ export default function ReportsIndex({ reports, centers, entities, filters }) {
     );
     const exportHref = `${route('reports.export')}?${new URLSearchParams(activeFilterParams).toString()}`;
 
+    const findEntityName = (id) => {
+        for (const entity of entities) {
+            if (String(entity.id) === String(id)) return entity.name;
+            const child = entity.children.find((c) => String(c.id) === String(id));
+            if (child) return child.name;
+        }
+        return id;
+    };
+
+    const activeChips = [
+        filters.search && { key: 'search', label: `${t('بحث')}: ${filters.search}` },
+        filters.date && { key: 'date', label: `${t('التاريخ')}: ${filters.date}` },
+        filters.entity_id && { key: 'entity_id', label: `${t('الجهة')}: ${findEntityName(filters.entity_id)}` },
+        filters.gender && { key: 'gender', label: `${t('الجنس')}: ${t(optionLabel(GENDER_OPTIONS, filters.gender))}` },
+        filters.nationality && { key: 'nationality', label: `${t('الجنسية')}: ${countryLabel(filters.nationality)}` },
+        filters.marital_status && { key: 'marital_status', label: `${t('الحالة')}: ${t(optionLabel(MARITAL_STATUS_OPTIONS, filters.marital_status))}` },
+        filters.violation_type && { key: 'violation_type', label: `${t('المخالفة')}: ${filters.violation_type}` },
+    ].filter(Boolean);
+
+    const removeFilter = (key) => {
+        const next = { ...activeFilterParams };
+        delete next[key];
+        router.get(route('reports.index'), next, { preserveState: true });
+    };
+
     return (
         <AuthenticatedLayout
             header={
                 <PageHeader
-                    title="البحث والتصفية في السجلات"
-                    subtitle="ابحث عبر كامل قاعدة البيانات المشتركة"
+                    title={t('البحث والتصفية في السجلات')}
+                    subtitle={t('ابحث عبر كامل قاعدة البيانات المشتركة')}
                     actions={
                         <PrimaryButton as="a" href={exportHref}>
                             <FileDown className="h-4 w-4" />
-                            تصدير Excel
+                            {t('تصدير Excel')}
                         </PrimaryButton>
                     }
                 />
             }
         >
-            <Head title="السجلات" />
+            <Head title={t('السجلات')} />
 
             <div className="space-y-6">
                 <Card>
                     <div className="mb-4 flex items-center justify-between">
                         <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                             <SlidersHorizontal className="h-4 w-4 text-slate-400" />
-                            عوامل التصفية
+                            {t('عوامل التصفية')}
                         </div>
                         <button
                             type="button"
                             onClick={() => setFiltersOpen((open) => !open)}
                             className="flex items-center gap-1 text-sm font-medium text-brand-600 md:hidden"
                         >
-                            {filtersOpen ? 'إخفاء الخيارات' : 'مزيد من الخيارات'}
+                            {filtersOpen ? t('إخفاء الخيارات') : t('مزيد من الخيارات')}
                             <ChevronDown className={`h-4 w-4 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} />
                         </button>
                     </div>
 
                     <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                         <div className="sm:col-span-3 lg:col-span-2">
-                            <InputLabel htmlFor="search" value="البحث (الاسم أو رقم السجل)" />
+                            <InputLabel htmlFor="search" value={t('البحث (الاسم أو رقم السجل)')} />
                             <div className="relative mt-1">
                                 <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                                 <TextInput
@@ -90,7 +118,7 @@ export default function ReportsIndex({ reports, centers, entities, filters }) {
 
                         <div className={`${filtersOpen ? 'contents' : 'hidden'} md:contents`}>
                             <div>
-                                <InputLabel htmlFor="date" value="التاريخ" />
+                                <InputLabel htmlFor="date" value={t('التاريخ')} />
                                 <TextInput
                                     id="date"
                                     type="date"
@@ -101,35 +129,18 @@ export default function ReportsIndex({ reports, centers, entities, filters }) {
                             </div>
 
                             <div>
-                                <InputLabel htmlFor="center_id" value="المركز" />
-                                <SelectInput
-                                    id="center_id"
-                                    className="mt-1"
-                                    value={data.center_id}
-                                    onChange={(e) => setData('center_id', e.target.value)}
-                                >
-                                    <option value="">الكل</option>
-                                    {centers.map((c) => (
-                                        <option key={c.id} value={c.id}>
-                                            {c.name}
-                                        </option>
-                                    ))}
-                                </SelectInput>
-                            </div>
-
-                            <div>
-                                <InputLabel htmlFor="entity_id" value="الجهة" />
+                                <InputLabel htmlFor="entity_id" value={t('الجهة')} />
                                 <SelectInput
                                     id="entity_id"
                                     className="mt-1"
                                     value={data.entity_id}
                                     onChange={(e) => setData('entity_id', e.target.value)}
                                 >
-                                    <option value="">الكل</option>
+                                    <option value="">{t('الكل')}</option>
                                     {entities.map((entity) =>
                                         entity.children.length > 0 ? (
                                             <optgroup key={entity.id} label={entity.name}>
-                                                <option value={entity.id}>{entity.name} (عام)</option>
+                                                <option value={entity.id}>{entity.name} ({t('عام')})</option>
                                                 {entity.children.map((child) => (
                                                     <option key={child.id} value={child.id}>
                                                         {child.name}
@@ -146,41 +157,48 @@ export default function ReportsIndex({ reports, centers, entities, filters }) {
                             </div>
 
                             <div>
-                                <InputLabel htmlFor="gender" value="الجنس" />
+                                <InputLabel htmlFor="gender" value={t('الجنس')} />
                                 <SelectInput
                                     id="gender"
                                     className="mt-1"
                                     value={data.gender}
                                     onChange={(e) => setData('gender', e.target.value)}
                                 >
-                                    <option value="">الكل</option>
+                                    <option value="">{t('الكل')}</option>
                                     {GENDER_OPTIONS.map((o) => (
                                         <option key={o.value} value={o.value}>
-                                            {o.label}
+                                            {t(o.label)}
                                         </option>
                                     ))}
                                 </SelectInput>
                             </div>
 
                             <div>
-                                <InputLabel htmlFor="marital_status" value="الحالة الاجتماعية" />
+                                <InputLabel htmlFor="nationality" value={t('الجنسية')} />
+                                <div className="mt-1">
+                                    <CountrySelect id="nationality" value={data.nationality} onChange={(code) => setData('nationality', code)} />
+                                </div>
+                            </div>
+
+                            <div>
+                                <InputLabel htmlFor="marital_status" value={t('الحالة الاجتماعية')} />
                                 <SelectInput
                                     id="marital_status"
                                     className="mt-1"
                                     value={data.marital_status}
                                     onChange={(e) => setData('marital_status', e.target.value)}
                                 >
-                                    <option value="">الكل</option>
+                                    <option value="">{t('الكل')}</option>
                                     {MARITAL_STATUS_OPTIONS.map((o) => (
                                         <option key={o.value} value={o.value}>
-                                            {o.label}
+                                            {t(o.label)}
                                         </option>
                                     ))}
                                 </SelectInput>
                             </div>
 
                             <div className="lg:col-span-2">
-                                <InputLabel htmlFor="violation_type" value="نوع المخالفة" />
+                                <InputLabel htmlFor="violation_type" value={t('نوع المخالفة')} />
                                 <TextInput
                                     id="violation_type"
                                     className="mt-1 block w-full"
@@ -192,18 +210,43 @@ export default function ReportsIndex({ reports, centers, entities, filters }) {
 
                         <div className="flex items-end gap-2 sm:col-span-3 lg:col-span-2">
                             <PrimaryButton type="submit" className="w-full sm:w-auto">
-                                تصفية
+                                {t('تصفية')}
                             </PrimaryButton>
                             <SecondaryButton type="button" onClick={clear}>
-                                مسح
+                                {t('مسح')}
                             </SecondaryButton>
                         </div>
                     </form>
                 </Card>
 
+                {(reports.total > 0 || activeChips.length > 0) && (
+                    <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+                        <p className="text-sm text-slate-500">
+                            {reports.total > 0
+                                ? t('عرض :from–:to من أصل :total سجل', { from: reports.from, to: reports.to, total: reports.total })
+                                : t('لا نتائج')}
+                        </p>
+                        {activeChips.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {activeChips.map((chip) => (
+                                    <button
+                                        key={chip.key}
+                                        type="button"
+                                        onClick={() => removeFilter(chip.key)}
+                                        className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 transition hover:bg-brand-100"
+                                    >
+                                        {chip.label}
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 <Card padding="p-0">
                     {reports.data.length === 0 ? (
-                        <EmptyState icon={FileSearch} title="لا توجد سجلات مطابقة" description="جرّب تعديل معايير البحث أو التصفية." />
+                        <EmptyState icon={FileSearch} title={t('لا توجد سجلات مطابقة')} description={t('جرّب تعديل معايير البحث أو التصفية.')} />
                     ) : (
                         <>
                             <div className="hidden overflow-x-auto md:block">
@@ -211,15 +254,15 @@ export default function ReportsIndex({ reports, centers, entities, filters }) {
                                     <thead>
                                         <tr className="text-start text-xs font-semibold uppercase tracking-wide text-slate-400">
                                             <th className="px-6 py-3.5 text-start">#</th>
-                                            <th className="px-4 py-3.5 text-start">الاسم</th>
-                                            <th className="px-4 py-3.5 text-start">التاريخ</th>
-                                            <th className="px-4 py-3.5 text-start">المركز</th>
-                                            <th className="px-4 py-3.5 text-start">الجهة</th>
-                                            <th className="px-4 py-3.5 text-start">الجنس</th>
-                                            <th className="px-4 py-3.5 text-start">الحالة الاجتماعية</th>
-                                            <th className="px-4 py-3.5 text-start">المخالفة</th>
-                                            <th className="px-4 py-3.5 text-start">العدد</th>
-                                            <th className="px-4 py-3.5 text-start">أُضيف بواسطة</th>
+                                            <th className="px-4 py-3.5 text-start">{t('الاسم')}</th>
+                                            <th className="px-4 py-3.5 text-start">{t('التاريخ')}</th>
+                                            <th className="px-4 py-3.5 text-start">{t('الجهة')}</th>
+                                            <th className="px-4 py-3.5 text-start">{t('الجنس')}</th>
+                                            <th className="px-4 py-3.5 text-start">{t('الجنسية')}</th>
+                                            <th className="px-4 py-3.5 text-start">{t('الحالة الاجتماعية')}</th>
+                                            <th className="px-4 py-3.5 text-start">{t('المخالفة')}</th>
+                                            <th className="px-4 py-3.5 text-start">{t('العدد')}</th>
+                                            <th className="px-4 py-3.5 text-start">{t('أُضيف بواسطة')}</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
@@ -231,15 +274,20 @@ export default function ReportsIndex({ reports, centers, entities, filters }) {
                                                         href={route('reports.show', report.id)}
                                                         className="font-semibold text-brand-600 hover:text-brand-700"
                                                     >
-                                                        {report.full_name}
+                                                        {report.full_name || t('بدون اسم')}
                                                     </Link>
                                                 </td>
-                                                <td className="px-4 py-3.5 tabular-nums text-slate-600">{report.report_date}</td>
-                                                <td className="px-4 py-3.5 text-slate-600">{report.center?.name ?? '—'}</td>
+                                                <td className="whitespace-nowrap px-4 py-3.5 tabular-nums text-slate-600">
+                                                    {report.report_date}
+                                                    {report.report_time && (
+                                                        <span className="text-xs text-slate-400"> · {report.report_time.slice(0, 5)}</span>
+                                                    )}
+                                                </td>
                                                 <td className="px-4 py-3.5 text-slate-600">{entityLabel(report.entity)}</td>
-                                                <td className="px-4 py-3.5 text-slate-600">{optionLabel(GENDER_OPTIONS, report.gender)}</td>
-                                                <td className="px-4 py-3.5 text-slate-600">{optionLabel(MARITAL_STATUS_OPTIONS, report.marital_status)}</td>
-                                                <td className="px-4 py-3.5 text-slate-600">{report.violation_type}</td>
+                                                <td className="px-4 py-3.5 text-slate-600">{t(optionLabel(GENDER_OPTIONS, report.gender))}</td>
+                                                <td className="px-4 py-3.5 text-slate-600">{countryLabel(report.nationality)}</td>
+                                                <td className="px-4 py-3.5 text-slate-600">{t(optionLabel(MARITAL_STATUS_OPTIONS, report.marital_status))}</td>
+                                                <td className="px-4 py-3.5 text-slate-600">{report.violation_type ?? '—'}</td>
                                                 <td className="px-4 py-3.5 tabular-nums text-slate-600">{report.count}</td>
                                                 <td className="px-4 py-3.5 text-slate-500">
                                                     <span className="inline-flex items-center gap-1.5">
@@ -257,17 +305,20 @@ export default function ReportsIndex({ reports, centers, entities, filters }) {
                                 {reports.data.map((report) => (
                                     <MobileRecordCard
                                         key={report.id}
-                                        title={report.full_name}
+                                        title={report.full_name || t('بدون اسم')}
                                         titleHref={route('reports.show', report.id)}
-                                        eyebrow={`#${report.id} — ${report.violation_type}`}
+                                        eyebrow={`#${report.id} — ${report.violation_type ?? t('بدون نوع')}`}
                                         fields={[
-                                            { label: 'التاريخ', value: report.report_date },
-                                            { label: 'المركز', value: report.center?.name },
-                                            { label: 'الجهة', value: entityLabel(report.entity) },
-                                            { label: 'الجنس', value: optionLabel(GENDER_OPTIONS, report.gender) },
-                                            { label: 'الحالة الاجتماعية', value: optionLabel(MARITAL_STATUS_OPTIONS, report.marital_status) },
-                                            { label: 'العدد', value: report.count },
-                                            { label: 'أُضيف بواسطة', value: report.creator?.name },
+                                            {
+                                                label: t('التاريخ'),
+                                                value: report.report_time ? `${report.report_date} ${report.report_time.slice(0, 5)}` : report.report_date,
+                                            },
+                                            { label: t('الجهة'), value: entityLabel(report.entity) },
+                                            { label: t('الجنس'), value: t(optionLabel(GENDER_OPTIONS, report.gender)) },
+                                            { label: t('الجنسية'), value: countryLabel(report.nationality) },
+                                            { label: t('الحالة الاجتماعية'), value: t(optionLabel(MARITAL_STATUS_OPTIONS, report.marital_status)) },
+                                            { label: t('العدد'), value: report.count },
+                                            { label: t('أُضيف بواسطة'), value: report.creator?.name },
                                         ]}
                                     />
                                 ))}

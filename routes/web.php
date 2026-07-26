@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SummaryController;
 use App\Http\Controllers\SuperAdmin\AdminController;
 use App\Http\Controllers\SuperAdmin\AdminRequestController;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -25,6 +26,17 @@ Route::get('/', function () {
 
     return redirect()->route('home');
 });
+
+// Language switcher — available everywhere, including the guest/login pages.
+// A full browser navigation (not an Inertia visit) so the <html lang/dir>
+// attributes set in the Blade root shell are correctly re-rendered.
+Route::get('/locale/{locale}', function (string $locale) {
+    if (in_array($locale, SetLocale::SUPPORTED_LOCALES, true)) {
+        session(['locale' => $locale]);
+    }
+
+    return redirect()->back();
+})->where('locale', 'ar|fr')->name('locale.switch');
 
 Route::get('/registration-pending', function () {
     return Inertia::render('Auth/AwaitingApproval');

@@ -17,7 +17,7 @@ class EntityController extends Controller
     }
 
     /**
-     * Top-level entities (POLICE, Police, FA, ...). Each card links to its
+     * Top-level entities (Sûreté Régionale de Nador, Police, FA, ...). Each card links to its
      * own branches page.
      */
     public function index(): Response
@@ -56,14 +56,14 @@ class EntityController extends Controller
             'created_by' => $request->user()->id,
         ]);
 
-        return back()->with('status', 'تمت إضافة الجهة بنجاح.');
+        return back()->with('status', __('تمت إضافة الجهة بنجاح.'));
     }
 
     public function update(UpdateEntityRequest $request, Entity $entity): RedirectResponse
     {
         $entity->update($request->validated());
 
-        return back()->with('status', 'تم تحديث بيانات الجهة.');
+        return back()->with('status', __('تم تحديث بيانات الجهة.'));
     }
 
     public function destroy(Entity $entity): RedirectResponse
@@ -73,7 +73,7 @@ class EntityController extends Controller
         $entity->delete();
 
         return $wasTopLevel
-            ? redirect()->route('entities.index')->with('status', 'تم حذف الجهة.')
-            : back()->with('status', 'تم حذف الجهة.');
+            ? redirect()->route('entities.index')->with('status', __('تم حذف الجهة.'))
+            : back()->with('status', __('تم حذف الجهة.'));
     }
 }

@@ -32,7 +32,9 @@ class AdminController extends Controller
 
         $user->update(['is_active' => ! $user->is_active]);
 
-        return back()->with('status', $user->is_active ? "{$user->name} reactivated." : "{$user->name} deactivated.");
+        return back()->with('status', $user->is_active
+            ? __('تمت إعادة تفعيل :name.', ['name' => $user->name])
+            : __('تم تعطيل :name.', ['name' => $user->name]));
     }
 
     public function destroy(User $user): RedirectResponse
@@ -41,6 +43,6 @@ class AdminController extends Controller
 
         $user->delete();
 
-        return back()->with('status', 'Account deleted.');
+        return back()->with('status', __('تم حذف الحساب.'));
     }
 }

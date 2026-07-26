@@ -1,5 +1,5 @@
 # Project Specification (Cahier des Charges)
-## Security Reports & Violations Management System — "POLICE System"
+## Security Reports & Violations Management System — "Sûreté Régionale de Nador System"
 
 **Version:** 1.1
 **Stack:** Laravel + React.js + Inertia.js

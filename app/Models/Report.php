@@ -19,9 +19,11 @@ class Report extends Model
         'full_name',
         'age',
         'gender',
+        'nationality',
         'marital_status',
         'violation_type',
         'report_date',
+        'report_time',
         'count',
         'notes',
     ];
@@ -69,6 +71,7 @@ class Report extends Model
             ->when($filters['center_id'] ?? null, fn (Builder $q, $centerId) => $q->where('center_id', $centerId))
             ->when($filters['entity_id'] ?? null, fn (Builder $q, $entityId) => $q->where('entity_id', $entityId))
             ->when($filters['gender'] ?? null, fn (Builder $q, $gender) => $q->where('gender', $gender))
+            ->when($filters['nationality'] ?? null, fn (Builder $q, $nationality) => $q->where('nationality', $nationality))
             ->when($filters['marital_status'] ?? null, fn (Builder $q, $status) => $q->where('marital_status', $status))
             ->when($filters['violation_type'] ?? null, fn (Builder $q, $type) => $q->where('violation_type', 'like', '%'.$type.'%'));
     }

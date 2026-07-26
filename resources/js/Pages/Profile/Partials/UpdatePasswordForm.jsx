@@ -3,10 +3,12 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
+import useTranslation from '@/Hooks/useTranslation';
 import { useForm } from '@inertiajs/react';
 import { Transition } from '@headlessui/react';
 
 export default function UpdatePasswordForm({ className = '' }) {
+    const { t } = useTranslation();
     const passwordInput = useRef();
     const currentPasswordInput = useRef();
 
@@ -39,13 +41,13 @@ export default function UpdatePasswordForm({ className = '' }) {
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-bold text-slate-900">تحديث كلمة المرور</h2>
-                <p className="mt-1 text-sm text-slate-500">استخدم كلمة مرور طويلة وعشوائية للحفاظ على أمان حسابك.</p>
+                <h2 className="text-lg font-bold text-slate-900">{t('تحديث كلمة المرور')}</h2>
+                <p className="mt-1 text-sm text-slate-500">{t('استخدم كلمة مرور طويلة وعشوائية للحفاظ على أمان حسابك.')}</p>
             </header>
 
             <form onSubmit={updatePassword} className="mt-6 space-y-5">
                 <div>
-                    <InputLabel htmlFor="current_password" value="كلمة المرور الحالية" />
+                    <InputLabel htmlFor="current_password" value={t('كلمة المرور الحالية')} />
 
                     <TextInput
                         id="current_password"
@@ -57,11 +59,11 @@ export default function UpdatePasswordForm({ className = '' }) {
                         autoComplete="current-password"
                     />
 
-                    <InputError message={errors.current_password} />
+                    <InputError message={errors.current_password && t(errors.current_password)} />
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="password" value="كلمة المرور الجديدة" />
+                    <InputLabel htmlFor="password" value={t('كلمة المرور الجديدة')} />
 
                     <TextInput
                         id="password"
@@ -73,11 +75,11 @@ export default function UpdatePasswordForm({ className = '' }) {
                         autoComplete="new-password"
                     />
 
-                    <InputError message={errors.password} />
+                    <InputError message={errors.password && t(errors.password)} />
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="password_confirmation" value="تأكيد كلمة المرور" />
+                    <InputLabel htmlFor="password_confirmation" value={t('تأكيد كلمة المرور')} />
 
                     <TextInput
                         id="password_confirmation"
@@ -88,11 +90,11 @@ export default function UpdatePasswordForm({ className = '' }) {
                         autoComplete="new-password"
                     />
 
-                    <InputError message={errors.password_confirmation} />
+                    <InputError message={errors.password_confirmation && t(errors.password_confirmation)} />
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>حفظ</PrimaryButton>
+                    <PrimaryButton disabled={processing}>{t('حفظ')}</PrimaryButton>
 
                     <Transition
                         show={recentlySuccessful}
@@ -101,7 +103,7 @@ export default function UpdatePasswordForm({ className = '' }) {
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-slate-500">تم الحفظ.</p>
+                        <p className="text-sm text-slate-500">{t('تم الحفظ.')}</p>
                     </Transition>
                 </div>
             </form>
